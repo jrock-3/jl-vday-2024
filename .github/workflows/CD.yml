@@ -1,53 +1,41 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: CD
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ['main']
+    branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow one concurrent deployment
-concurrency:
-  group: 'pages'
-  cancel-in-progress: true
-
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Node
+      - uses: actions/checkout@v3
+
+      - name: Set Node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: Run install
         run: npm install
-      - name: Build
-        run: npm run build
+      
+      - name: Build production bundle
         env:
           VITE_REASONS: ${{ secrets.VITE_REASONS }}
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: 'dist'
-          destination-github-username: 'jrock-3'
-          destination-repository-name: 'jlxjl'
-          user-email: justin.liao3@gmail.com
-          target-branch: main
+          run: npm run build
+
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "dist/" | while read line; do
+          echo "::warning title=Invalid file permissions automatically fixed::$line"
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with: 
+          path: dist
+
+      - name: Deploy artifact
+        uses: actions/deploy-pages@v4
