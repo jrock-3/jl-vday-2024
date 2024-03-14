@@ -27,11 +27,6 @@ jobs:
         env:
           VITE_REASONS: ${{ secrets.VITE_REASONS }}
 
-      - name: Fix permissions
-        run: |
-          chmod -c -R +rX "dist/" | while read line; do
-          echo "::warning title=Invalid file permissions automatically fixed::$line"
-
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with: 
