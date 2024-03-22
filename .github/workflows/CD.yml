@@ -39,11 +39,14 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
-      
+
+      - name: Download .env file
+        run: |
+          npx -y dotenv-vault@latest pull production --dotenvMe=${{ secrets.DOTENV_ME }}
+          mv .env.production .env
+
       - name: Build
         run: npm run build
-        env:
-          VITE_REASONS: ${{ secrets.VITE_REASONS }}
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
