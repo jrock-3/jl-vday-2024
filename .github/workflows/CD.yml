@@ -40,6 +40,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # dotenv-vault@1.26.1 (current @latest) still uses @oclif/screen@^1, which is depreciated
       - name: Download .env file
         run: |
           npx -y dotenv-vault@latest pull production --dotenvMe=${{ secrets.DOTENV_ME }}
